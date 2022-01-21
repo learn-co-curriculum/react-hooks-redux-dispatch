@@ -29,43 +29,28 @@ function changeState(state, action) {
 let state = { count: 0 };
 let action = { type: "counter/increment" };
 
-changeState(state, action);
+state = changeState(state, action);
 // => {count: 1}
 ```
 
 ## Persisting State
 
-We currently have a problem. Let's call `changeState` multiple times:
-
-```javascript
-changeState(state, { type: "counter/increment" });
-// => {count: 1}
-changeState(state, { type: "counter/increment" });
-// => {count: 1}
-changeState(state, { type: "counter/increment" });
-// => {count: 1}
-```
-
-See that? Our state never increases beyond one. It starts off as zero, and
-while the `changeState` function returns one more than that, if we look at
-state, it still returns `{count: 0}`. Now, fixing this in the console isn't so
-bad. We just write
+Any time we want to preserve the return value of our reducer function, we need
+to store it in some variable, like so:
 
 ```javascript
 state = changeState(state, { type: "counter/increment" });
-state;
 //  => {count: 1}
 state = changeState(state, { type: "counter/increment" });
 //  => {count: 2}
 ```
 
-Here, we're reassigning state to the return value of our reducer. This way, the
-second time `changeState` is called, it is using the updated state in its
+Here, we're reassigning `state` to the return value of our reducer. This way,
+each time `changeState` is called, it is using the updated state in its
 arguments.
 
-Ok. So let's encapsulate this procedure in a function so that we can just call
-that method and it will persist our changes. We'll name that function
-`dispatch`.
+Let's encapsulate this procedure in a function so that we can just call that
+method and it will persist our changes. We'll name that function `dispatch`.
 
 ```javascript
 let state = { count: 0 };
@@ -92,23 +77,23 @@ dispatch({ type: "counter/increment" });
 // => {count: 3}
 ```
 
-Ok, it's fixed!! Previously our state was stuck at one, but now we just call
-our `dispatch` function, and pass through our action. Let's walk through it.
+Nice! Now we just call our `dispatch` function, and pass through our action, and
+our state is preserved. Let's walk through it.
 
-We declare our state to equal an object `{count: 0}`. Then, we define our
-reducer and our new function `dispatch`. At the bottom, we call the `dispatch`
-function and pass through our action, `{type: 'counter/increment'}`. When we call
-`dispatch`, this calls our `changeState` reducer, and passes the action object
-to the reducer. When called, the `changeState` reducer also takes in `state`,
-which has been declared up above.
+We declare our `state` variable and assign it a value of `{count: 0}`. Then, we
+define our reducer and our new function `dispatch`. At the bottom, we call the
+`dispatch` function and pass through our action, `{type: 'counter/increment'}`.
+When we call `dispatch`, this calls our `changeState` reducer, and passes the
+action object to the reducer. When called, the `changeState` reducer also takes
+in `state`, which has been declared up above.
 
 `state` is assigned the return value of `changeState`. Since the
-`counter/increment` type was used, the returned value of `changeState` contains a
-`count` equal to the previous state's count plus one.
+`counter/increment` type was used, the returned value of `changeState` contains
+a `count` equal to the previous state's count plus one.
 
-Thus, our state is updated. Each time `dispatch` is called, the current version of
-`state` is passed into `changeState`, and then `state` is assigned a new value based
-on what `changeState` returns.
+Thus, our state is updated. Each time `dispatch` is called, the current version
+of `state` is passed into `changeState`, and then `state` is assigned a new
+value based on what `changeState` returns.
 
 ## Rendering Our State
 
@@ -119,7 +104,8 @@ HTML:
 
 ```javascript
 function render() {
-  document.body.textContent = state.count;
+  const app = document.querySelector("#app");
+  app.textContent = state.count;
 }
 ```
 
@@ -143,7 +129,8 @@ function dispatch(action) {
 }
 
 function render() {
-  document.body.textContent = state.count;
+  const app = document.querySelector("#app");
+  app.textContent = state.count;
 }
 
 // call the render function
@@ -158,7 +145,8 @@ changing our `dispatch` function to the following.
 
 ```javascript
 function render() {
-  document.body.textContent = state.count;
+  const app = document.querySelector("#app");
+  app.textContent = state.count;
 }
 
 function dispatch(action) {
@@ -187,7 +175,8 @@ function changeState(state, action) {
 }
 
 function render() {
-  document.body.textContent = state.count;
+  const app = document.querySelector("#app");
+  app.textContent = state.count;
 }
 
 function dispatch(action) {
@@ -205,6 +194,9 @@ increases!
 
 With just this set of functions, we could actually apply our own Redux pattern
 to a regular ol' JavaScript and HTML webpage!
+
+In the future, we'll also see how to dispatch actions in response to user
+events.
 
 ## Conclusion
 
